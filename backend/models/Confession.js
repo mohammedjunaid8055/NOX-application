@@ -1,22 +1,23 @@
 import mongoose from "mongoose";
 
-const confessionSchema = new mongoose.Schema({
-  content: {
-    type: String,
-    required: true
+const replySchema = new mongoose.Schema(
+  {
+    content: { type: String, required: true, maxlength: 280 },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    anonymousName: { type: String, default: "Anonymous" },
   },
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User"
+  { timestamps: true }
+);
+
+const confessionSchema = new mongoose.Schema(
+  {
+    content: { type: String, required: true, maxlength: 280 },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    anonymousName: { type: String, default: "Anonymous" },
+    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    replies: [replySchema],
   },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  likes: {
-    type: Array,
-    default: []
-  }
-});
+  { timestamps: true }
+);
 
 export default mongoose.model("Confession", confessionSchema);
