@@ -1,4 +1,4 @@
-const API = 'http://localhost:5000/api';
+const API = process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:5000/api';
 
 const headers = () => {
   const token = localStorage.getItem('token');

@@ -178,7 +178,7 @@ body {
   border-radius: var(--r-sm);
   padding: 14px 16px;
   color: var(--t1);
-  font-size: 0.9375rem;
+  font-size: 16px;
   font-family: 'Inter', sans-serif;
   outline: none;
   transition: all 0.2s;
@@ -368,7 +368,7 @@ body {
   background: transparent;
   border: none;
   color: var(--t1);
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-family: 'Inter', sans-serif;
   resize: none;
   outline: none;
@@ -500,7 +500,7 @@ body {
   border-radius: var(--r-full);
   padding: 10px 16px;
   color: var(--t1);
-  font-size: 0.9375rem;
+  font-size: 16px;
   outline: none;
   transition: border-color 0.2s;
 }
@@ -549,7 +549,7 @@ body {
 
 /* ── RESPONSIVE ────────────────────────────────────── */
 @media (max-width: 1080px) { .sidebar-r { display: none; } }
-@media (max-width: 680px) {
+@media (max-width: 850px) {
   .sidebar-l { 
     position: fixed;
     bottom: 0;
@@ -588,6 +588,6 @@ body {
     color: var(--accent2);
   }
   .nav-text { display: none; }
-  .feed-col { max-width: 100%; border-right: none; padding-bottom: 70px; }
+  .feed-col { max-width: 100%; border-right: none; padding-bottom: 90px; }
   .layout { display: block; }
 }
