@@ -7,7 +7,10 @@ const router = express.Router();
 // GET all confessions
 router.get("/", async (req, res) => {
   try {
-    const confessions = await Confession.find().sort({ createdAt: -1 });
+    const confessions = await Confession.find()
+      .populate('userId', 'avatar anonymousName')
+      .populate('replies.userId', 'avatar anonymousName')
+      .sort({ createdAt: -1 });
     res.json(confessions);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -17,17 +20,60 @@ router.get("/", async (req, res) => {
 // POST create confession (auth required)
 router.post("/", auth, async (req, res) => {
   try {
-    const { content } = req.body;
+    const { content, image } = req.body;
     if (!content?.trim()) return res.status(400).json({ message: "Content is required" });
 
     const confession = new Confession({
       content: content.trim(),
+      image: image || "",
       userId: req.user.id,
       anonymousName: req.user.anonymousName,
     });
 
     await confession.save();
-    res.json({ message: "Posted", confession });
+    const populated = await Confession.findById(confession._id).populate('userId', 'avatar anonymousName');
+    res.json({ message: "Posted", confession: populated });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PUT edit confession (auth required)
+router.put("/:id", auth, async (req, res) => {
+  try {
+    const { content } = req.body;
+    if (!content?.trim()) return res.status(400).json({ message: "Content is required" });
+    
+    const confession = await Confession.findById(req.params.id);
+    if (!confession) return res.status(404).json({ message: "Not found" });
+
+    if (confession.userId.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Unauthorized to edit this confession" });
+    }
+
+    confession.content = content.trim();
+    await confession.save();
+    
+    // Return populated
+    const populated = await Confession.findById(confession._id).populate('userId', 'avatar anonymousName');
+    res.json({ message: "Edited", confession: populated });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE delete confession (auth required)
+router.delete("/:id", auth, async (req, res) => {
+  try {
+    const confession = await Confession.findById(req.params.id);
+    if (!confession) return res.status(404).json({ message: "Not found" });
+
+    if (confession.userId.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Unauthorized to delete this confession" });
+    }
+
+    await Confession.findByIdAndDelete(req.params.id);
+    res.json({ message: "Deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -73,7 +119,10 @@ router.post("/:id/reply", auth, async (req, res) => {
     confession.replies.push(reply);
     await confession.save();
 
+    // Populate the newly added reply's userId
+    await confession.populate('replies.userId', 'avatar anonymousName');
     const saved = confession.replies[confession.replies.length - 1];
+    
     res.json({ message: "Reply added", reply: saved });
   } catch (err) {
     res.status(500).json({ error: err.message });

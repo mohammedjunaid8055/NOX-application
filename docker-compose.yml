@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: confession-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: confession-backend
+    ports:
+      - "5000:5000"
+    environment:
+      # Use the local MongoDB container
+      - MONGO_URI=mongodb://mongodb:27017/confession_wall
+      - PORT=5000
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: confession-frontend
+    ports:
+      # Map to port 80 since Nginx serves on port 80 inside the container
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  mongo-data:

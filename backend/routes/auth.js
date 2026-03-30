@@ -2,6 +2,7 @@ import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import auth from "../middleware/auth.js";
 
 const router = express.Router();
 const SECRET = process.env.JWT_SECRET || "whispr_secret_2024";
@@ -45,7 +46,32 @@ router.post("/login", async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res.json({ token, anonymousName: user.anonymousName, userId: user._id.toString() });
+    res.json({ token, anonymousName: user.anonymousName, userId: user._id.toString(), avatar: user.avatar });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Update Profile
+router.put("/profile", auth, async (req, res) => {
+  try {
+    const { avatar, anonymousName } = req.body;
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (avatar !== undefined) user.avatar = avatar;
+    if (anonymousName !== undefined) user.anonymousName = anonymousName;
+
+    await user.save();
+    
+    // Refresh token with new anonymousName
+    const token = jwt.sign(
+      { id: user._id, anonymousName: user.anonymousName },
+      SECRET,
+      { expiresIn: "7d" }
+    );
+    
+    res.json({ message: "Profile updated", token, user: { anonymousName: user.anonymousName, avatar: user.avatar, id: user._id } });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

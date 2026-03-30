@@ -5,18 +5,29 @@ const MAX = 280;
 
 export default function PostBox({ anonymousName, onPost }) {
   const [text, setText] = useState('');
+  const [image, setImage] = useState('');
   const [loading, setLoading] = useState(false);
   const initial = anonymousName ? anonymousName[0].toUpperCase() : '?';
   const left = MAX - text.length;
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setImage(reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
 
   const submit = async () => {
     if (!text.trim() || left < 0 || loading) return;
     setLoading(true);
     try {
-      const data = await postConfession(text.trim());
+      const data = await postConfession(text.trim(), image);
       if (data.confession) {
         onPost(data.confession);
         setText('');
+        setImage('');
       }
     } catch (e) {
       console.error(e);
@@ -37,10 +48,27 @@ export default function PostBox({ anonymousName, onPost }) {
             rows={3}
             onChange={(e) => setText(e.target.value)}
           />
+          {image && (
+            <div style={{ position: 'relative', marginTop: 10, display: 'inline-block' }}>
+              <img src={image} alt="upload preview" style={{ maxHeight: 200, borderRadius: 8, objectFit: 'cover' }} />
+              <button 
+                onClick={() => setImage('')} 
+                style={{ position: 'absolute', top: 5, right: 5, background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none', borderRadius: '50%', width: 24, height: 24, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                ✕
+              </button>
+            </div>
+          )}
           <div className="post-footer">
-            <span className={`char-count ${left < 40 ? 'char-warn' : ''} ${left < 0 ? 'char-over' : ''}`}>
-              {left}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <label style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', color: 'var(--accent2)' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} />
+              </label>
+              <span className={`char-count ${left < 40 ? 'char-warn' : ''} ${left < 0 ? 'char-over' : ''}`}>
+                {left}
+              </span>
+            </div>
             <button className="btn-post" onClick={submit} disabled={!text.trim() || left < 0 || loading}>
               {loading ? 'Posting…' : 'Whisper'}
             </button>

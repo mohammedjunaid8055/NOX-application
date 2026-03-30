@@ -12,6 +12,7 @@ const replySchema = new mongoose.Schema(
 const confessionSchema = new mongoose.Schema(
   {
     content: { type: String, required: true, maxlength: 280 },
+    image: { type: String, default: "" },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     anonymousName: { type: String, default: "Anonymous" },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],

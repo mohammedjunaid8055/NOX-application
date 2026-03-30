@@ -13,6 +13,10 @@ const userSchema = new mongoose.Schema({
   anonymousName: {
     type: String,
     required: true
+  },
+  avatar: {
+    type: String,
+    default: ""
   }
 });
 

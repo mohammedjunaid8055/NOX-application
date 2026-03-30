@@ -36,6 +36,7 @@ export default function AuthPage({ onLogin }) {
           localStorage.setItem('token', data.token);
           localStorage.setItem('anonymousName', data.anonymousName);
           localStorage.setItem('userId', data.userId);
+          localStorage.setItem('avatar', data.avatar || '');
           onLogin();
         } else {
           setError(data.message || 'Login failed. Try again.');
