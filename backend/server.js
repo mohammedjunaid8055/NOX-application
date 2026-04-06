@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
+import compression from "compression";
+import helmet from "helmet";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -15,13 +17,21 @@ dotenv.config();
 
 const app = express();
 
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ limit: "50mb", extended: true }));
+app.use(helmet({
+  contentSecurityPolicy: false, // Avoid blocking React on the same domain
+}));
+app.use(compression());
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use(cors());
 
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI, {
+  maxPoolSize: 10, // Avoid hitting MongoDB Atlas free tier connection limits
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+})
   .then(() => console.log("MongoDB Atlas Connected"))
-  .catch(err => console.log(err));
+  .catch(err => console.error("Mongoose connection error:", err));
 
 // ROUTES
 app.use("/api/auth", authRoutes);

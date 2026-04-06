@@ -4,14 +4,27 @@ import auth from "../middleware/auth.js";
 
 const router = express.Router();
 
-// GET all confessions
+// GET all confessions with pagination
 router.get("/", async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20; // Default limit 20
+    const skip = (page - 1) * limit;
+
+    const total = await Confession.countDocuments();
     const confessions = await Confession.find()
       .populate('userId', 'avatar anonymousName')
       .populate('replies.userId', 'avatar anonymousName')
-      .sort({ createdAt: -1 });
-    res.json(confessions);
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.json({
+      confessions,
+      total,
+      page,
+      pages: Math.ceil(total / limit)
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

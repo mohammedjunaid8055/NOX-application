@@ -8,6 +8,9 @@ export default function FeedPage({ onLogout }) {
   const [activeTab, setActiveTab] = useState('home');
   const [confessions, setConfessions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState('');
   
   const currentUserId = localStorage.getItem('userId');
@@ -19,19 +22,36 @@ export default function FeedPage({ onLogout }) {
   const [newName, setNewName] = useState(anonymousName);
   const [savingProfile, setSavingProfile] = useState(false);
 
-  const fetchFeed = useCallback(async () => {
+  const fetchFeed = useCallback(async (pageNum = 1) => {
+    if (pageNum === 1) setLoading(true);
+    else setLoadingMore(true);
+
     try {
-      const data = await getConfessions();
-      if (Array.isArray(data)) setConfessions(data);
-      else setError('Failed to load confessions.');
+      const data = await getConfessions(pageNum, 15); // Smaller page size is faster
+      if (data && Array.isArray(data.confessions)) {
+        if (pageNum === 1) setConfessions(data.confessions);
+        else setConfessions((prev) => [...prev, ...data.confessions]);
+        
+        setHasMore(data.page < data.pages);
+        setPage(data.page);
+      } else {
+        setError('Failed to load confessions.');
+      }
     } catch {
       setError('Cannot connect to server.');
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   }, []);
 
-  useEffect(() => { fetchFeed(); }, [fetchFeed]);
+  useEffect(() => { fetchFeed(1); }, [fetchFeed]);
+
+  const loadMore = () => {
+    if (!loadingMore && hasMore) {
+      fetchFeed(page + 1);
+    }
+  };
 
   const handlePost = (confession) => setConfessions((prev) => [confession, ...prev]);
 
@@ -120,8 +140,20 @@ export default function FeedPage({ onLogout }) {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarUrl(reader.result);
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_SIZE = 400; // Profile pics don't need to be huge
+          let w = img.width;
+          let h = img.height;
+          if (w > h && w > MAX_SIZE) { h *= MAX_SIZE / w; w = MAX_SIZE; }
+          else if (h > MAX_SIZE) { w *= MAX_SIZE / h; h = MAX_SIZE; }
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          setAvatarUrl(canvas.toDataURL('image/jpeg', 0.7)); // Compress to 70% jpeg
+        };
+        img.src = ev.target.result;
       };
       reader.readAsDataURL(file);
     }
@@ -232,6 +264,14 @@ export default function FeedPage({ onLogout }) {
               onDelete={handleDelete}
             />
           ))}
+
+          {!loading && !error && hasMore && (
+            <div style={{ textAlign: 'center', padding: '20px' }}>
+              <button className="btn-primary" onClick={loadMore} disabled={loadingMore} style={{ width: 'auto', padding: '10px 24px' }}>
+                {loadingMore ? 'Loading...' : 'Load more sessions'}
+              </button>
+            </div>
+          )}
         </main>
 
         {/* Right Sidebar */}

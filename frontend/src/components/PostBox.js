@@ -14,7 +14,21 @@ export default function PostBox({ anonymousName, onPost }) {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => setImage(reader.result);
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_SIZE = 800; // Efficient size for feed
+          let w = img.width;
+          let h = img.height;
+          if (w > h && w > MAX_SIZE) { h *= MAX_SIZE / w; w = MAX_SIZE; }
+          else if (h > MAX_SIZE) { w *= MAX_SIZE / h; h = MAX_SIZE; }
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          setImage(canvas.toDataURL('image/jpeg', 0.6)); // High compression for efficiency
+        };
+        img.src = ev.target.result;
+      };
       reader.readAsDataURL(file);
     }
   };

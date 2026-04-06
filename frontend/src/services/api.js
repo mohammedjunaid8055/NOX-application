@@ -29,8 +29,8 @@ export const updateProfile = (avatar, anonymousName) =>
     body: JSON.stringify({ avatar, anonymousName }),
   }).then((r) => r.json());
 
-export const getConfessions = () =>
-  fetch(`${API}/confessions`, { headers: headers() }).then((r) => r.json());
+export const getConfessions = (page = 1, limit = 20) =>
+  fetch(`${API}/confessions?page=${page}&limit=${limit}`, { headers: headers() }).then((r) => r.json());
 
 export const postConfession = (content, image) =>
   fetch(`${API}/confessions`, {
