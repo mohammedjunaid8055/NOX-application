@@ -27,18 +27,26 @@ export default function FeedPage({ onLogout }) {
     else setLoadingMore(true);
 
     try {
-      const data = await getConfessions(pageNum, 15); // Smaller page size is faster
-      if (data && Array.isArray(data.confessions)) {
-        if (pageNum === 1) setConfessions(data.confessions);
-        else setConfessions((prev) => [...prev, ...data.confessions]);
+      const resp = await getConfessions(pageNum, 15);
+      // In case of error HTML or non-json (should already be handled by api.js but check)
+      if (resp && Array.isArray(resp.confessions)) {
+        if (pageNum === 1) setConfessions(resp.confessions);
+        else setConfessions((prev) => [...prev, ...resp.confessions]);
         
-        setHasMore(data.page < data.pages);
-        setPage(data.page);
+        setHasMore(resp.page < resp.pages);
+        setPage(resp.page);
+        setError(''); // Clear errors on success
+      } else if (Array.isArray(resp)) {
+        // Fallback for legacy backend if it didn't update yet
+        setConfessions(resp);
+        setHasMore(false);
+        setError('');
       } else {
-        setError('Failed to load confessions.');
+        setError('No response from server. Try refreshing.');
       }
-    } catch {
-      setError('Cannot connect to server.');
+    } catch (err) {
+      console.error('Fetch error:', err);
+      setError('Cannot connect to server. Check your connection.');
     } finally {
       setLoading(false);
       setLoadingMore(false);

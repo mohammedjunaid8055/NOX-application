@@ -18,11 +18,13 @@ dotenv.config();
 const app = express();
 
 app.use(helmet({
-  contentSecurityPolicy: false, // Avoid blocking React on the same domain
+  contentSecurityPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginEmbedderPolicy: false,
 }));
 app.use(compression());
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ limit: "10mb", extended: true }));
+app.use(express.json({ limit: "16mb" }));
+app.use(express.urlencoded({ limit: "16mb", extended: true }));
 app.use(cors());
 
 mongoose.connect(process.env.MONGO_URI, {
