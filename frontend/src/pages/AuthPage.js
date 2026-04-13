@@ -52,7 +52,7 @@ export default function AuthPage({ onLogin }) {
         }
       }
     } catch {
-      setError('Cannot reach server. Is the backend running on port 5000?');
+      setError('Cannot reach server. Is the backend running?');
     } finally {
       setLoading(false);
     }
@@ -61,15 +61,15 @@ export default function AuthPage({ onLogin }) {
   return (
     <div className="auth-bg">
       <div className="auth-card">
-        <div className="auth-logo">Nox 🌙</div>
-        <p className="auth-sub">Share anonymously. Be heard.</p>
+        <div className="auth-logo">NEX<span className="accent-text">US</span></div>
+        <p className="auth-sub">Hidden connections. Anonymous voices.</p>
 
         <div className="auth-tabs">
           <button className={`auth-tab ${mode === 'login' ? 'active' : ''}`} onClick={() => switchMode('login')}>
-            Login
+            [ Sign In ]
           </button>
           <button className={`auth-tab ${mode === 'register' ? 'active' : ''}`} onClick={() => switchMode('register')}>
-            Register
+            [ Register ]
           </button>
         </div>
 
@@ -90,14 +90,14 @@ export default function AuthPage({ onLogin }) {
           </div>
           {mode === 'register' && (
             <div className="form-group">
-              <label className="form-label">Anonymous Name</label>
+              <label className="form-label">Anonymous Identity</label>
               <input className="form-input" type="text" name="anonymousName"
-                placeholder="e.g. ShadowFox, BlueGhost…"
+                placeholder="e.g. ShadowNode, GhostWire…"
                 value={form.anonymousName} onChange={change} />
             </div>
           )}
           <button className="btn-primary" type="submit" disabled={loading}>
-            {loading ? 'Please wait…' : mode === 'login' ? 'Sign In' : 'Create Account'}
+            {loading ? 'Connecting…' : mode === 'login' ? '→ Enter Nexus' : '→ Create Identity'}
           </button>
         </form>
       </div>

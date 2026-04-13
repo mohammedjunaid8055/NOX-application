@@ -13,9 +13,9 @@ router.get("/", async (req, res) => {
 
     const total = await Confession.countDocuments();
     const confessions = await Confession.find()
-      .select('-image') // Exclude large base64 image data from list
-      .populate('userId', 'anonymousName') // Exclude avatar (huge base64)
-      .populate('replies.userId', 'anonymousName')
+      .select('-image') // Exclude large post images, but keep user data
+      .populate('userId', 'avatar anonymousName')
+      .populate('replies.userId', 'avatar anonymousName')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)

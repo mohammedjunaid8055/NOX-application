@@ -15,10 +15,11 @@ export default function ConfessionCard({ confession, currentUserId, onLike, onRe
   // Safe extraction of populated user or string ID
   const authorId = typeof userId === 'object' && userId ? userId._id : userId;
   const authorAvatar = typeof userId === 'object' && userId ? userId.avatar : undefined;
+  const authorName = typeof userId === 'object' && userId ? userId.anonymousName : anonymousName;
 
   const isLiked = likes.map(String).includes(String(currentUserId));
   const isMine = String(authorId) === String(currentUserId);
-  const initial = anonymousName ? anonymousName[0].toUpperCase() : '?';
+  const initial = authorName ? authorName[0].toUpperCase() : '?';
 
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [showReplies, setShowReplies] = useState(false);
@@ -52,8 +53,8 @@ export default function ConfessionCard({ confession, currentUserId, onLike, onRe
           <div className="avatar">{initial}</div>
         )}
         <div className="card-meta">
-          <div className="card-name">{anonymousName || 'Anonymous'}</div>
-          <div className="card-handle">@{(anonymousName || 'anonymous').toLowerCase().replace(/\s+/g, '')}</div>
+          <div className="card-name">{authorName || 'Anonymous'}</div>
+          <div className="card-handle">@{(authorName || 'anonymous').toLowerCase().replace(/\s+/g, '')}</div>
         </div>
         <span className="card-time">{ago(createdAt)}</span>
       </div>

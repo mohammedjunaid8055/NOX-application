@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 export default function Navbar({ anonymousName, avatar, onLogout, onLogoClick }) {
   const initial = anonymousName ? anonymousName[0].toUpperCase() : '?';
   return (
     <nav className="navbar">
       <div className="navbar-inner">
-        <span className="navbar-brand" style={{ cursor: 'pointer' }} onClick={onLogoClick}>Nox 🌙</span>
+        <span className="navbar-brand" style={{ cursor: 'pointer' }} onClick={onLogoClick}>
+          NEX<span className="accent-text">US</span>
+        </span>
         <div className="navbar-right">
           {avatar ? (
             <img src={avatar} alt="avatar" className="avatar img-avatar" />

@@ -134,11 +134,13 @@ export default function FeedPage({ onLogout }) {
         
         setUserAvatar(data.user.avatar);
         setAnonymousName(data.user.anonymousName);
+        setAvatarUrl(data.user.avatar || '');
+        setNewName(data.user.anonymousName || '');
         alert('Profile saved!');
-        fetchFeed(); // Refresh to update feed usernames
+        fetchFeed(); // Refresh to update feed
       }
     } catch (e) {
-      alert('Error updating profile');
+      alert('Error updating profile: ' + e.message);
     } finally {
       setSavingProfile(false);
     }
@@ -193,7 +195,7 @@ export default function FeedPage({ onLogout }) {
       <div className="layout">
         {/* Left Sidebar */}
         <aside className="sidebar-l">
-          <div className="sidebar-l-logo">Nox 🌙</div>
+          <div className="sidebar-l-logo">NEX<span className="accent-text">US</span></div>
           <div className={`nav-item ${activeTab === 'home' ? 'active' : ''}`} onClick={() => setActiveTab('home')}>
             <span className="nav-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></span>
             <span className="nav-text">Home</span>
@@ -216,9 +218,9 @@ export default function FeedPage({ onLogout }) {
         <main className="feed-col">
           {activeTab === 'home' && <PostBox anonymousName={anonymousName} avatar={userAvatar} onPost={handlePost} />}
 
-          {activeTab === 'explore' && <div className="post-box"><h2 style={{color: 'var(--t1)'}}>Trending 🔥</h2><p style={{color: 'var(--t2)', fontSize: '0.9rem'}}>Most liked confessions across Nox</p></div>}
+          {activeTab === 'explore' && <div className="post-box"><h2 style={{color: 'var(--t1)'}}>Trending</h2><p style={{color: 'var(--t2)', fontSize: '0.85rem', fontFamily: 'var(--font-mono)', letterSpacing: '1px'}}>Most active threads on Nexus</p></div>}
           
-          {activeTab === 'notifications' && <div className="post-box"><h2 style={{color: 'var(--t1)'}}>Your Interactions 🔔</h2><p style={{color: 'var(--t2)', fontSize: '0.9rem'}}>Posts of yours that received replies</p></div>}
+          {activeTab === 'notifications' && <div className="post-box"><h2 style={{color: 'var(--t1)'}}>Interactions</h2><p style={{color: 'var(--t2)', fontSize: '0.85rem', fontFamily: 'var(--font-mono)', letterSpacing: '1px'}}>Your threads with replies</p></div>}
 
           {activeTab === 'profile' && (
             <div className="post-box" style={{ background: 'var(--surface)' }}>
@@ -294,24 +296,24 @@ export default function FeedPage({ onLogout }) {
         {/* Right Sidebar */}
         <aside className="sidebar-r">
           <div className="widget">
-            <h3 className="widget-title">Trending</h3>
+            <h3 className="widget-title">[ Active Threads ]</h3>
             <div className="trend">
-              <div className="trend-label">Trending in Confessions</div>
+              <div className="trend-label">Trending</div>
               <div className="trend-name">#Anonymous</div>
             </div>
             <div className="trend">
-              <div className="trend-label">Popular today</div>
-              <div className="trend-name">#Secrets</div>
+              <div className="trend-label">Popular</div>
+              <div className="trend-name">#Confessions</div>
             </div>
             <div className="trend">
               <div className="trend-label">New</div>
-              <div className="trend-name">#Nox</div>
+              <div className="trend-name">#Nexus</div>
             </div>
           </div>
           <div className="widget">
-            <h3 className="widget-title">About Nox</h3>
-            <p style={{ color: 'var(--t2)', fontSize: '0.875rem', lineHeight: 1.6 }}>
-              A safe space to share your thoughts anonymously. Your identity stays hidden — always.
+            <h3 className="widget-title">[ About Nexus ]</h3>
+            <p style={{ color: 'var(--t2)', fontSize: '0.8rem', lineHeight: 1.7, fontFamily: 'var(--font-mono)' }}>
+              A hidden network for anonymous voices. Your identity stays encrypted — always.
             </p>
           </div>
         </aside>
