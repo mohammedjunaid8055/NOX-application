@@ -4,17 +4,18 @@ import auth from "../middleware/auth.js";
 
 const router = express.Router();
 
-// GET all confessions with pagination
+// GET all confessions with pagination (lightweight - no large base64 fields)
 router.get("/", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20; // Default limit 20
+    const limit = Math.min(parseInt(req.query.limit) || 10, 10); // Max 10 per page
     const skip = (page - 1) * limit;
 
     const total = await Confession.countDocuments();
     const confessions = await Confession.find()
-      .populate('userId', 'avatar anonymousName')
-      .populate('replies.userId', 'avatar anonymousName')
+      .select('-image') // Exclude large base64 image data from list
+      .populate('userId', 'anonymousName') // Exclude avatar (huge base64)
+      .populate('replies.userId', 'anonymousName')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
