@@ -33,9 +33,12 @@ export default function PostBox({ anonymousName, onPost }) {
     }
   };
 
+  const [error, setError] = useState('');
+
   const submit = async () => {
     if (!text.trim() || left < 0 || loading) return;
     setLoading(true);
+    setError('');
     try {
       const data = await postConfession(text.trim(), image);
       if (data.confession) {
@@ -45,6 +48,7 @@ export default function PostBox({ anonymousName, onPost }) {
       }
     } catch (e) {
       console.error(e);
+      setError(e.message || 'Failed to post. Try again.');
     } finally {
       setLoading(false);
     }
@@ -55,9 +59,10 @@ export default function PostBox({ anonymousName, onPost }) {
       <div className="post-box-row">
         <div className="avatar avatar-lg">{initial}</div>
         <div className="post-box-body">
+          {error && <div className="alert alert-error" style={{marginBottom: 8}}>{error}</div>}
           <textarea
             className="post-textarea"
-            placeholder="What's your confession?"
+            placeholder="What's on your mind?"
             value={text}
             rows={3}
             onChange={(e) => setText(e.target.value)}
@@ -84,7 +89,7 @@ export default function PostBox({ anonymousName, onPost }) {
               </span>
             </div>
             <button className="btn-post" onClick={submit} disabled={!text.trim() || left < 0 || loading}>
-              {loading ? 'Posting…' : 'Whisper'}
+              {loading ? 'Sending…' : 'Transmit'}
             </button>
           </div>
         </div>

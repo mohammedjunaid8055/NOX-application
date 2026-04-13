@@ -48,6 +48,20 @@ const handleResponse = async (res) => {
     const errorMessage = (typeof data === 'object' && (data.message || data.error)) 
       ? (data.message || data.error) 
       : (typeof data === 'string' ? data.substring(0, 100) : `Status ${res.status}`);
+    
+    // Auto-logout on invalid/expired token or suspended account
+    if (res.status === 401 || res.status === 400) {
+      if (errorMessage === 'Invalid token' || errorMessage === 'No token, access denied' || errorMessage === 'Account has been suspended') {
+        console.warn('[Auth] Token invalid or account suspended — logging out');
+        localStorage.clear();
+        alert(errorMessage === 'Account has been suspended' 
+          ? 'Your account has been suspended by an administrator.' 
+          : 'Session expired. Please log in again.');
+        window.location.reload();
+        return;
+      }
+    }
+    
     throw new Error(errorMessage);
   }
   return data;
