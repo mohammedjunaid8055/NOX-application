@@ -12,7 +12,7 @@ const headers = () => {
   };
 };
 
-const fetchWithTimeout = async (url, options = {}, timeout = 8000) => {
+const fetchWithTimeout = async (url, options = {}, timeout = 60000) => {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
   console.log(`[API Request] Attempting: ${url}`);
