@@ -46,7 +46,7 @@ export default function FeedPage({ onLogout }) {
       }
     } catch (err) {
       console.error('Fetch error:', err);
-      setError('Cannot connect to server. Check your connection.');
+      setError(err.message || 'Cannot connect to server. Check your connection.');
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -253,7 +253,16 @@ export default function FeedPage({ onLogout }) {
             <div className="spinner-wrap"><div className="spinner" /></div>
           )}
           {!loading && error && (
-            <div className="feed-empty"><h3>😶 {error}</h3></div>
+            <div className="feed-empty">
+              <h3>😶 {error}</h3>
+              <button 
+                className="btn-primary" 
+                onClick={() => fetchFeed(1)} 
+                style={{ width: 'auto', marginTop: '16px', padding: '10px 24px' }}
+              >
+                Retry Connection
+              </button>
+            </div>
           )}
           {!loading && !error && filteredConfessions.length === 0 && (
             <div className="feed-empty">

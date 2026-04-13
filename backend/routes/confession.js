@@ -17,7 +17,8 @@ router.get("/", async (req, res) => {
       .populate('replies.userId', 'avatar anonymousName')
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit);
+      .limit(limit)
+      .lean();
 
     res.json({
       confessions,

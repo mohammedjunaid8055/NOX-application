@@ -21,4 +21,6 @@ const confessionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+confessionSchema.index({ createdAt: -1 });
+
 export default mongoose.model("Confession", confessionSchema);

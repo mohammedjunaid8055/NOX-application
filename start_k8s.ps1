@@ -3,7 +3,16 @@ Write-Host "Clearing MINIKUBE_HOME since drives are merged..." -ForegroundColor 
 [Environment]::SetEnvironmentVariable("MINIKUBE_HOME", $null, "User")
 $env:MINIKUBE_HOME=""
 
-$minikubeExe = "C:\Program Files\Kubernetes\Minikube\minikube.exe"
+# Check if minikube is in path, else use hardcoded fallback
+$minikubeExe = "minikube"
+if (!(Get-Command $minikubeExe -ErrorAction SilentlyContinue)) {
+    $minikubeExe = "C:\Program Files\Kubernetes\Minikube\minikube.exe"
+}
+
+if (!(Test-Path $minikubeExe)) {
+    Write-Host "ERROR: Minikube not found at $minikubeExe or in PATH" -ForegroundColor Red
+    exit
+}
 
 # Check if Docker is running
 Write-Host "Checking if Docker Desktop is running..." -ForegroundColor Cyan
@@ -18,20 +27,20 @@ if ($LASTEXITCODE -ne 0) {
     exit
 }
 
-Write-Host "Docker is running! Cleaning up broken VirtualBox profiles..." -ForegroundColor Cyan
+Write-Host "Docker is running! Resetting Minikube to ensure clean state..." -ForegroundColor Cyan
 & $minikubeExe delete
 
-Write-Host "Starting Minikube safely using Docker..." -ForegroundColor Cyan
+Write-Host "Starting Minikube safely using Docker driver..." -ForegroundColor Cyan
 & $minikubeExe start --driver=docker
 
-# Stop script if Minikube failed to start
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Minikube failed to start. Check the errors above." -ForegroundColor Red
     exit
 }
 
 Write-Host "Syncing Docker daemon to Minikube..." -ForegroundColor Cyan
-& $minikubeExe docker-env | Invoke-Expression
+# Specifically request powershell syntax for the environment variables
+& $minikubeExe docker-env --shell powershell | Invoke-Expression
 
 Write-Host "Building Backend Image inside Minikube..." -ForegroundColor Cyan
 docker build -t nox-backend:latest ./backend
@@ -40,10 +49,15 @@ Write-Host "Building Frontend Image inside Minikube..." -ForegroundColor Cyan
 docker build -t nox-frontend:latest ./frontend
 
 Write-Host "Applying Kubernetes manifests in k8s/ directory..." -ForegroundColor Cyan
-kubectl apply -f k8s/
+if (Test-Path "k8s") {
+    kubectl apply -f k8s/
+} else {
+    Write-Host "ERROR: k8s directory not found!" -ForegroundColor Red
+}
 
 Write-Host "==========================================================" -ForegroundColor Green
 Write-Host "Cluster spun up successfully! Run 'kubectl get pods' to check status." -ForegroundColor Green
-Write-Host "Remember to run 'kubectl port-forward svc/backend 5000:5000'" -ForegroundColor Yellow
-Write-Host "and 'kubectl port-forward svc/frontend 3000:80' in separate terminals." -ForegroundColor Yellow
+Write-Host "Remember to run the following in separate terminals:" -ForegroundColor Yellow
+Write-Host "1. kubectl port-forward svc/backend 5000:5000" -ForegroundColor Yellow
+Write-Host "2. kubectl port-forward svc/frontend 3000:80" -ForegroundColor Yellow
 Write-Host "==========================================================" -ForegroundColor Green
